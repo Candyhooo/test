@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>星際撞地球 - 太空生存挑戰</title>
+    <style>
+        :root {
+            --primary-color: #4facfe;
+            --secondary-color: #00f2fe;
+            --danger-color: #ff4b1f;
+            --bg-color: #0b0d17;
+            --ui-bg: rgba(20, 30, 48, 0.8);
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* 防止選取文字 */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: white;
+            font-family: var(--font-main);
+            overflow: hidden; /* 防止出現捲軸 */
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 遊戲畫布 */
+        canvas {
+            display: block;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* UI 層 */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 讓點擊穿透到 Canvas，除非是按鈕 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        /* HUD (抬頭顯示器) */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .life-container {
+            display: flex;
+            gap: 5px;
+        }
+
+        .heart {
+            color: var(--danger-color);
+            font-size: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .heart.lost {
+            opacity: 0.3;
+            transform: scale(0.8);
+        }
+
+        /* 遊戲選單 (開始/結束) */
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--ui-bg);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: auto; /* 允許點擊 */
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
+            transition: opacity 0.3s;
+            max-width: 90%;
+            width: 400px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #ddd;
+            line-height: 1.5;
+        }
+
+        .score-display {
+            font-size: 3rem;
+            margin: 20px 0;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        /* 按鈕樣式 */
+        button {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            padding: 12px 30px;
+            color: white;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.6);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* 操作提示 */
+        .controls-hint {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        /* 受傷螢幕震動動畫 */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .shake-effect {
+            animation: shake 0.5s;
+            animation-iteration-count: 1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 遊戲畫布 -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- UI 層 -->
+    <div id="ui-layer">
+        <!-- HUD -->
+        <div class="hud" id="hud">
+            <div class="score-box">分數: <span id="score">0</span></div>
+            <div class="life-container" id="lives">
+                <span class="heart">❤</span>
+                <span class="heart">❤</span>
+                <span class="heart">❤</span>
+            </div>
+        </div>
+
+        <!-- 開始畫面 -->
+        <div id="start-screen" class="modal">
+            <h1>星際撞地球</h1>
+            <p>地球正遭受隕石雨的襲擊！<br>作為唯一的防護者，請保護地球不被撞擊。</p>
+            <div class="controls-hint">
+                🖱️ 滑鼠/手指：拖曳移動<br>
+                ⌨️ 鍵盤：← → 方向鍵移動
+            </div>
+            <br>
+            <button id="start-btn">開始防護</button>
+        </div>
+
+        <!-- 遊戲結束畫面 -->
+        <div id="game-over-screen" class="modal hidden">
+            <h1>防護失敗</h1>
+            <p>地球遭受了嚴重撞擊</p>
+            <div class="score-display" id="final-score">0</div>
+            <button id="restart-btn">再次挑戰</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 遊戲設定與全域變數
+         */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const uiLayer = document.getElementById('ui-layer');
+        const scoreEl = document.getElementById('score');
+        const finalScoreEl = document.getElementById('final-score');
+        const livesContainer = document.getElementById('lives');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        let animationId;
+        let lastTime = 0;
+        let score = 0;
+        let lives = 3;
+        let isGameOver = false;
+        let gameRunning = false;
+        
+        // 遊戲參數
+        let spawnRate = 1000; // 毫秒
+        let lastSpawn = 0;
+        let difficultyMultiplier = 1;
+
+        // 實體陣列
+        let asteroids = [];
+        let particles = [];
+        let stars = [];
+
+        // 輸入狀態
+        const input = {
+            left: false,
+            right: false,
+            mouseX: null
+        };
+
+        /**
+         * 初始化 Canvas 尺寸
+         */
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // 重新生成背景星星
+            initStars();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        /**
+         * 類別定義
+         */
+        
+        // 玩家 (地球)
+        class Player {
+            constructor() {
+                this.radius = 40;
+                this.x = canvas.width / 2;
+                this.y = canvas.height - this.radius - 30;
+                this.speed = 8;
+                this.color = '#4facfe';
+                this.atmosphereColor = 'rgba(0, 242, 254, 0.4)';
+            }
+
+            draw() {
+                // 繪製大氣層光暈
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius + 10, 0, Math.PI * 2);
+                ctx.fillStyle = this.atmosphereColor;
+                ctx.fill();
+                ctx.closePath();
+
+                // 繪製地球本體
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                // 簡單的徑向漸變模擬球體
+                let gradient = ctx.createRadialGradient(
+                    this.x - 10, this.y - 10, 5,
+                    this.x, this.y, this.radius
+                );
+                gradient.addColorStop(0, '#00f2fe');
+                gradient.addColorStop(1, '#4facfe');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                // 簡單的大陸裝飾 (隨機綠色塊)
+                ctx.fillStyle = 'rgba(46, 204, 113, 0.6)';
+                ctx.beginPath();
+                ctx.arc(this.x - 15, this.y - 10, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x + 20, this.y + 15, 12, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.closePath();
+            }
+
+            update() {
+                // 鍵盤控制
+                if (input.left && this.x > this.radius) {
+                    this.x -= this.speed;
+                }
+                if (input.right && this.x < canvas.width - this.radius) {
+                    this.x += this.speed;
+                }
+
+                // 滑鼠/觸控控制 (優先)
+                if (input.mouseX !== null) {
+                    // 平滑移動到滑鼠位置
+                    const dx = input.mouseX - this.x;
+                    if (Math.abs(dx) > 1) {
+                        this.x += dx * 0.15; // 0.15 是平滑係數
+                    }
+                    
+                    // 邊界限制
+                    if (this.x < this.radius) this.x = this.radius;
+                    if (this.x > canvas.width - this.radius) this.x = canvas.width - this.radius;
+                }
+            }
+        }
+
+        // 隕石
+        class Asteroid {
+            constructor() {
+                this.radius = Math.random() * 20 + 15; // 大小 15 ~ 35
+                this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+                this.y = -this.radius;
+                this.speed = (Math.random() * 3 + 2) * difficultyMultiplier;
+                this.rotation = 0;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+                this.vertices = [];
+                
+                // 生成不規則形狀
+                const numVertices = 7;
+                for (let i = 0; i < numVertices; i++) {
+                    const angle = (i / numVertices) * Math.PI * 2;
+                    const r = this.radius * (0.8 + Math.random() * 0.4);
+                    this.vertices.push({
+                        x: Math.cos(angle) * r,
+                        y: Math.sin(angle) * r
+                    });
+                }
+                
+                // 顏色 (灰褐色調)
+                const gray = Math.floor(Math.random() * 50 + 100);
+                this.color = `rgb(${gray}, ${gray - 20}, ${gray - 30})`;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                ctx.beginPath();
+                ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                for (let i = 1; i < this.vertices.length; i++) {
+                    ctx.lineTo(this.vertices[i].x, this.vertices[i].y);
+                }
+                ctx.closePath();
+                
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                // 陰影效果
+                ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            update() {
+                this.y += this.speed;
+                this.rotation += this.rotationSpeed;
+            }
+        }
+
+        // 粒子效果 (爆炸)
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = Math.random() * 3 + 1;
+                this.color = color;
+                const velocity = Math.random() * 5 + 1;
+                const angle = Math.random() * Math.PI * 2;
+                this.dx = Math.cos(angle) * velocity;
+                this.dy = Math.sin(angle) * velocity;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.02 + 0.01;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.x += this.dx;
+                this.y += this.dy;
+                this.alpha -= this.decay;
+            }
+        }
+
+        // 背景星星
+        class Star {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.blinkSpeed = Math.random() * 0.05;
+                this.alpha = Math.random();
+                this.direction = 1;
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+
+            update() {
+                this.alpha += this.blinkSpeed * this.direction;
+                if (this.alpha >= 1 || this.alpha <= 0.2) {
+                    this.direction *= -1;
+                }
+            }
+        }
+
+        /**
+         * 遊戲邏輯函數
+         */
+
+        let player;
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 100; i++) {
+                stars.push(new Star());
+            }
+        }
+
+        function initGame() {
+            player = new Player();
+            asteroids = [];
+            particles = [];
+            score = 0;
+            lives = 3;
+            spawnRate = 1000;
+            difficultyMultiplier = 1;
+            isGameOver = false;
+            gameRunning = true;
+            input.mouseX = null; // 重置滑鼠位置
+            
+            updateUI();
+            
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            
+            animate(0);
+        }
+
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 15; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function triggerShake() {
+            document.body.classList.add('shake-effect');
+            setTimeout(() => {
+                document.body.classList.remove('shake-effect');
+            }, 500);
+        }
+
+        function updateUI() {
+            scoreEl.innerText = score;
+            const hearts = document.querySelectorAll('.heart');
+            hearts.forEach((heart, index) => {
+                if (index < lives) {
+                    heart.classList.remove('lost');
+                } else {
+                    heart.classList.add('lost');
+                }
+            });
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            finalScoreEl.innerText = score;
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        /**
+         * 主循環
+         */
+        function animate(timestamp) {
+            if (!gameRunning) return;
+
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            // 清除畫布
+            ctx.fillStyle = 'rgba(11, 13, 23, 0.4)'; // 拖尾效果
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 繪製背景星星
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+
+            // 玩家更新
+            player.update();
+            player.draw();
+
+            // 生成隕石
+            if (timestamp - lastSpawn > spawnRate) {
+                asteroids.push(new Asteroid());
+                lastSpawn = timestamp;
+                
+                // 難度遞增邏輯
+                if (spawnRate > 400) spawnRate -= 10;
+                difficultyMultiplier += 0.005;
+            }
+
+            // 隕石更新與碰撞檢測
+            for (let i = asteroids.length - 1; i >= 0; i--) {
+                const a = asteroids[i];
+                a.update();
+                a.draw();
+
+                // 超出螢幕移除
+                if (a.y - a.radius > canvas.height) {
+                    asteroids.splice(i, 1);
+                    score += 10;
+                    updateUI();
+                    continue;
+                }
+
+                // 碰撞檢測 (圓形碰撞)
+                const dx = a.x - player.x;
+                const dy = a.y - player.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < a.radius + player.radius) {
+                    // 發生碰撞
+                    createExplosion(a.x, a.y, '#ff4b1f'); // 隕石爆炸
+                    createExplosion(player.x, player.y, '#4facfe'); // 地球受擊特效
+                    triggerShake();
+                    
+                    lives--;
+                    updateUI();
+                    asteroids.splice(i, 1);
+
+                    if (lives <= 0) {
+                        gameOver();
+                    }
+                }
+            }
+
+            // 粒子更新
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw();
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        /**
+         * 事件監聽
+         */
+        
+        // 鍵盤
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') input.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd') input.right = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') input.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd') input.right = false;
+        });
+
+        // 滑鼠/觸控
+        function handleMove(clientX) {
+            if (!gameRunning) return;
+            const rect = canvas.getBoundingClientRect();
+            input.mouseX = clientX - rect.left;
+        }
+
+        window.addEventListener('mousemove', (e) => handleMove(e.clientX));
+        window.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // 防止捲動
+            handleMove(e.touches[0].clientX);
+        }, { passive: false });
+
+        window.addEventListener('touchstart', (e) => {
+             if (gameRunning) handleMove(e.touches[0].clientX);
+        }, { passive: false });
+        
+        window.addEventListener('touchend', () => {
+            // 觸控結束不重置 mouseX，讓地球停留在最後位置，或者可以設為 null
+        });
+
+        // 按鈕
+        startBtn.addEventListener('click', () => {
+            initGame();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            initGame();
+        });
+
+        // 初始化
+        resizeCanvas();
+        initStars();
+        
+        // 繪製初始背景 (讓開始畫面後面不是全黑)
+        function drawInitialBackground() {
+            ctx.fillStyle = '#0b0d17';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                star.draw();
+            });
+        }
+        drawInitialBackground();
+
+    </script>
+</body>
+</html>
