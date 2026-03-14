@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Game Library List</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1152d4",
+                        "accent-gold": "#FFD700",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "card-dark": "#192233",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-effect {
+            background: rgba(35, 47, 72, 0.7);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 glass-effect border-b border-white/5 px-4 pt-12 pb-4">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full border-2 border-accent-gold overflow-hidden bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-accent-gold">sports_esports</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tight text-white">Game Center</h1>
+<p class="text-xs text-accent-gold/80 font-medium">Candyheeeee's Hub</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="size-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-white text-[22px]">notifications</span>
+</button>
+</div>
+</div>
+<!-- Search Bar -->
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400 text-xl">search</span>
+</div>
+<input class="block w-full pl-10 pr-4 py-3 bg-[#232f48] border-none rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-primary text-sm" placeholder="Search games..." type="text"/>
+</div>
+</header>
+<main class="px-4 pb-24">
+<!-- Filter Tabs -->
+<div class="flex gap-2 py-6 overflow-x-auto no-scrollbar">
+<button class="px-5 py-2 rounded-full bg-primary text-white text-sm font-semibold shadow-lg shadow-primary/20">All Games</button>
+<button class="px-5 py-2 rounded-full bg-white/5 text-slate-300 text-sm font-medium hover:bg-white/10">Arcade</button>
+<button class="px-5 py-2 rounded-full bg-white/5 text-slate-300 text-sm font-medium hover:bg-white/10">Action</button>
+<button class="px-5 py-2 rounded-full bg-white/5 text-slate-300 text-sm font-medium hover:bg-white/10">Puzzle</button>
+</div>
+<div class="flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-lg font-bold text-white flex items-center gap-2">
+<span class="w-1 h-5 bg-accent-gold rounded-full"></span>
+                    My Library
+                </h2>
+<span class="text-xs text-slate-400 uppercase tracking-widest font-bold">2 Games</span>
+</div>
+<!-- Game Card: Snake -->
+<div class="group relative bg-card-dark rounded-2xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all shadow-xl">
+<div class="h-48 w-full bg-cover bg-center relative" data-alt="Retro neon green snake game interface on dark background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBouc2LCD_OLJdS8ypDAj5fqdFQyMHNdHi3r638B2jsDo1ULUGN5gxe1b8swuzMILMjWQDFBN68tE0lnDohI7VUwDRdfc3vgMvxSyzzF0HZcgt2kQGpES-OStgZc4gE7D35Y1wUp39tO0XDw1YGukXd9jKALX6XzE2yZLMSidEGvUOsuxjG4kPixeXM6kFnGr-r4AdpcYfk0dLA46a6LJsnv17xnPP_J8GrllxI7n2sk-lSOqGpq8hEORT5Km1hDaXCdfP1CFi-yGw');">
+<div class="absolute inset-0 bg-gradient-to-t from-card-dark via-transparent to-transparent"></div>
+<div class="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-2 py-1 rounded-md border border-white/10">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-accent-gold text-xs fill-1">star</span>
+<span class="text-[10px] text-white font-bold">4.8</span>
+</div>
+</div>
+</div>
+<div class="p-5 flex items-center justify-between">
+<div>
+<h3 class="text-xl font-bold text-white mb-1 group-hover:text-primary transition-colors">Snake</h3>
+<p class="text-slate-400 text-sm font-medium">Good Fun</p>
+</div>
+<button class="bg-primary hover:bg-primary/80 text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-lg shadow-primary/30 active:scale-95 transition-all">
+                        Play Now
+                    </button>
+</div>
+</div>
+<!-- Game Card: Interstellar Strike -->
+<div class="group relative bg-card-dark rounded-2xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all shadow-xl">
+<div class="h-48 w-full bg-cover bg-center relative" data-alt="Cinematic deep space nebula with asteroids and planets" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA6QN-dUWZde4vlm2_fTbEaqPcpyv31--cQtHXc6zWfy55zKdMgibpWh-HviXq2cI8D9krAMTbaxuVBqOI4Xt5mgILaqIXJd1Q82HYrv_GqEijr7RZva5HTlTPQ_342THRPrQ5dOr8KgUVIoPsFLpxvw465lAVhb5o9N6L_i-ROaZ-I-YuDofpNu18KoLVx9rzIkN65PQVhnoTHg8El4yfO7Y_J4Fj6adgEnoYDmN4Gh2eZZ3sLSaTRfjA_IXeUdC75SWpcLLrruEI');">
+<div class="absolute inset-0 bg-gradient-to-t from-card-dark via-transparent to-transparent"></div>
+<div class="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-2 py-1 rounded-md border border-white/10">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-accent-gold text-xs fill-1">star</span>
+<span class="text-[10px] text-white font-bold">5.0</span>
+</div>
+</div>
+</div>
+<div class="p-5 flex items-center justify-between">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<h3 class="text-xl font-bold text-white group-hover:text-primary transition-colors">Interstellar Strike</h3>
+</div>
+<p class="text-slate-400 text-sm font-medium">星際撞地球 · <span class="text-accent-gold/80 italic">Interesting</span></p>
+</div>
+<button class="bg-primary hover:bg-primary/80 text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-lg shadow-primary/30 active:scale-95 transition-all">
+                        Play Now
+                    </button>
+</div>
+</div>
+<!-- Footer Note -->
+<div class="py-8 text-center">
+<div class="inline-flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-widest">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+                    More games coming soon
+                </div>
+</div>
+</div>
+</main>
+<!-- iOS Style Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 glass-effect border-t border-white/5 px-6 pb-8 pt-3 flex items-center justify-between z-50">
+<button class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="text-[10px] font-bold uppercase">Store</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined fill-1">library_books</span>
+<span class="text-[10px] font-bold uppercase">Library</span>
+<div class="h-1 w-1 bg-primary rounded-full absolute -bottom-1"></div>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="text-[10px] font-bold uppercase">Social</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold uppercase">Profile</span>
+</button>
+</nav>
+</body></html>
